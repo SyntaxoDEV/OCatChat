@@ -1,253 +1,147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCat - Random Chat and Cam</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        .header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            text-align: center;
-        }
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .cat-icon {
-            font-size: 24px;
-        }
-        .main-container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 500px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .video-container {
-            flex-grow: 1;
-            background-color: #333;
-            position: relative;
-        }
-        .video-self {
-            position: absolute;
-            width: 150px;
-            bottom: 10px;
-            right: 10px;
-            border: 2px solid white;
-            border-radius: 5px;
-        }
-        .video-stranger {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .text-chat {
-            height: 200px;
-            border-top: 1px solid #ddd;
-            overflow-y: auto;
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        .message {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 18px;
-            max-width: 70%;
-        }
-        .message.self {
-            background-color: #4CAF50;
-            color: white;
-            margin-left: auto;
-        }
-        .message.stranger {
-            background-color: #e5e5ea;
-            color: black;
-            margin-right: auto;
-        }
-        .controls {
-            display: flex;
-            padding: 10px;
-            background-color: #f5f5f5;
-        }
-        .chat-input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            margin-right: 10px;
-        }
-        .btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-primary {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .btn-danger {
-            background-color: #f44336;
-            color: white;
-        }
-        .btn-secondary {
-            background-color: #e7e7e7;
-            color: black;
-        }
-        .options {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 5px;
-        }
-        .option-row {
-            margin-bottom: 10px;
-        }
-        label {
-            margin-right: 10px;
-        }
-        select, input[type="text"] {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OCat — Chat</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#e6eef8;background:linear-gradient(180deg,#071021 0%, #071834 60%);}    
+    .app{max-width:980px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:700;color:white}
+    h1{margin:0;font-size:20px}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.6);}    
+    .muted{color:var(--muted);font-size:13px}
+
+    .messages{flex:1;overflow:auto;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);display:flex;flex-direction:column;gap:8px;min-height:300px}
+    .msg{max-width:70%;padding:10px;border-radius:10px}
+    .msg.me{background:linear-gradient(90deg, rgba(124,58,237,0.15), rgba(59,130,246,0.12));align-self:flex-end}
+    .msg.other{background:rgba(255,255,255,0.03);align-self:flex-start}
+    .compose{display:flex;gap:8px;padding-top:10px}
+    .compose input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff}
+    button{background:var(--accent);border:0;padding:10px 14px;border-radius:10px;color:#fff;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
+
+    /* small helpers */
+    .center{display:flex;align-items:center;justify-content:center}
+  </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">OCat <span class="cat-icon">🐱</span></div>
-        <div>Random Video Chat with Strangers</div>
-    </div>
-
-    <div class="main-container">
-        <div class="chat-container">
-            <div class="video-container">
-                <video id="strangerVideo" class="video-stranger" autoplay></video>
-                <video id="selfVideo" class="video-self" autoplay muted></video>
-            </div>
-            <div class="text-chat" id="textChat">
-                <!-- Messages will appear here -->
-                <div class="message system">Welcome to OCat! Click "Start" to begin chatting.</div>
-            </div>
-            <div class="controls">
-                <input type="text" class="chat-input" id="messageInput" placeholder="Type your message..." disabled>
-                <button class="btn btn-primary" id="sendBtn" disabled>Send</button>
-                <button class="btn btn-danger" id="disconnectBtn" disabled>Disconnect</button>
-            </div>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">OC</div>
+        <div>
+          <h1>OCat — Chat</h1>
+          <div class="muted">Anonymous text chat</div>
         </div>
+      </div>
+      <div class="controls">
+        <div id="userInfo" class="muted">Not logged in</div>
+        <button id="btnLogout" class="ghost">Logout</button>
+      </div>
+    </header>
 
-        <div class="options">
-            <div class="option-row">
-                <label for="interestInput">Interest (optional):</label>
-                <input type="text" id="interestInput" placeholder="e.g. music, gaming">
-            </div>
-            <div class="option-row">
-                <label>Chat Mode:</label>
-                <select id="chatMode">
-                    <option value="video">Video Chat</option>
-                    <option value="text">Text Only</option>
-                </select>
-            </div>
-            <div class="option-row">
-                <button class="btn btn-primary" id="startBtn">Start Chatting</button>
-                <button class="btn btn-secondary" id="stopBtn" disabled>Stop</button>
-            </div>
+    <main style="margin-top:18px">
+      <div class="card">
+        <div id="messages" class="messages"></div>
+        <div class="compose">
+          <input id="inputMsg" placeholder="Type a message..." disabled />
+          <button id="sendBtn" disabled>Send</button>
         </div>
-    </div>
+      </div>
+    </main>
+  </div>
 
-    <script>
-        // JavaScript functionality would go here
-        document.getElementById('startBtn').addEventListener('click', function() {
-            // Start chat functionality
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = false;
-            document.getElementById('messageInput').disabled = false;
-            document.getElementById('sendBtn').disabled = false;
-            document.getElementById('disconnectBtn').disabled = false;
-            
-            // Simulate finding a stranger
-            setTimeout(function() {
-                const textChat = document.getElementById('textChat');
-                const systemMsg = document.createElement('div');
-                systemMsg.className = 'message system';
-                systemMsg.textContent = 'Stranger connected! Say hello!';
-                textChat.appendChild(systemMsg);
-            }, 2000);
-        });
+  <script>
+    (function(){
+      // Robust parsing of sessionStorage and safe early return to avoid trying to access properties of null.
+      let user = null;
+      try{
+        const raw = sessionStorage.getItem('ocat_user');
+        if(raw) user = JSON.parse(raw);
+      }catch(err){
+        console.warn('OCat: failed to parse session user:', err);
+      }
 
-        document.getElementById('sendBtn').addEventListener('click', function() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            if (message) {
-                const textChat = document.getElementById('textChat');
-                const msgElement = document.createElement('div');
-                msgElement.className = 'message self';
-                msgElement.textContent = message;
-                textChat.appendChild(msgElement);
-                input.value = '';
-                textChat.scrollTop = textChat.scrollHeight;
-                
-                // Simulate response
-                setTimeout(function() {
-                    const responses = [
-                        "Hi there! How are you?",
-                        "Nice to meet you!",
-                        "I love cats too!",
-                        "What are your hobbies?",
-                        "Where are you from?"
-                    ];
-                    const response = responses[Math.floor(Math.random() * responses.length)];
-                    const strangerMsg = document.createElement('div');
-                    strangerMsg.className = 'message stranger';
-                    strangerMsg.textContent = response;
-                    textChat.appendChild(strangerMsg);
-                    textChat.scrollTop = textChat.scrollHeight;
-                }, 1000 + Math.random() * 2000);
-            }
-        });
+      // If user is missing, redirect back to index.html and stop executing the rest of the script.
+      if(!user){
+        // try to update UI (if present) so the user sees something before redirect
+        const info = document.getElementById('userInfo');
+        if(info) info.textContent = 'Not logged in — redirecting...';
+        // use replace so back button doesn't return to this page
+        window.location.replace('index.html');
+        return; // <- important: stop further execution to avoid TypeError
+      }
 
-        document.getElementById('disconnectBtn').addEventListener('click', function() {
-            const textChat = document.getElementById('textChat');
-            const systemMsg = document.createElement('div');
-            systemMsg.className = 'message system';
-            systemMsg.textContent = 'Stranger disconnected. Click "Start" to find someone new.';
-            textChat.appendChild(systemMsg);
-            
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('messageInput').disabled = true;
-            document.getElementById('sendBtn').disabled = true;
-            document.getElementById('disconnectBtn').disabled = true;
-        });
+      // Safe to use `user` now. Provide defaults to avoid further issues.
+      const displayName = (user.name && String(user.name)) || 'User';
+      const displayAge = (user.age !== undefined && user.age !== null) ? String(user.age) : '—';
 
-        document.getElementById('stopBtn').addEventListener('click', function() {
-            document.getElementById('disconnectBtn').click();
-        });
+      const userInfoEl = document.getElementById('userInfo');
+      if(userInfoEl) userInfoEl.textContent = `${displayName} • ${displayAge} yrs`;
 
-        // Enter key to send message
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('sendBtn').click();
-            }
+      const messagesBox = document.getElementById('messages');
+      const inputEl = document.getElementById('inputMsg');
+      const sendBtn = document.getElementById('sendBtn');
+
+      // Enable compose UI now that we know user exists
+      if(inputEl) inputEl.disabled = false;
+      if(sendBtn) sendBtn.disabled = false;
+
+      function addMsg(txt, me=false){
+        const d = document.createElement('div');
+        d.className = 'msg ' + (me? 'me':'other');
+        // support simple markup (escape first)
+        d.textContent = txt;
+        const meta = document.createElement('div');
+        meta.style.fontSize = '11px';
+        meta.style.opacity = '0.6';
+        meta.style.marginTop = '6px';
+        meta.textContent = new Date().toLocaleTimeString();
+        d.appendChild(meta);
+        if(messagesBox) messagesBox.appendChild(d);
+        if(messagesBox) messagesBox.scrollTop = messagesBox.scrollHeight;
+      }
+
+      // welcome message
+      addMsg(`Welcome, ${displayName}! You are connected (demo).`, false);
+
+      // Send message
+      if(sendBtn){
+        sendBtn.addEventListener('click', function(){
+          const val = inputEl.value.trim();
+          if(!val) return;
+          inputEl.value = '';
+          addMsg(val, true);
+          // demo echo from "other"
+          setTimeout(()=> addMsg('Echo: ' + val, false), 450);
         });
-    </script>
+      }
+
+      // allow Enter to send
+      if(inputEl){
+        inputEl.addEventListener('keydown', function(e){
+          if(e.key === 'Enter' && !e.shiftKey){
+            e.preventDefault();
+            if(sendBtn) sendBtn.click();
+          }
+        });
+      }
+
+      // Logout
+      const btnLogout = document.getElementById('btnLogout');
+      if(btnLogout){
+        btnLogout.addEventListener('click', function(){
+          sessionStorage.removeItem('ocat_user');
+          window.location.replace('index.html');
+        });
+      }
+
+    })();
+  </script>
 </body>
 </html>
